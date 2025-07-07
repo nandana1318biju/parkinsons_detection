@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Parkinson’s Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS + Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #6a11cb, #2575fc, #43cea2, #185a9d);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      color: #222;
+      transition: background 0.5s, color 0.5s;
+    }
+
+    .dark-mode {
+      background: #1a1a2e !important;
+      color: #f0f0f0;
+    }
+
+    .dark-mode .container {
+      background-color: #222;
+      box-shadow: 0 12px 25px rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.96);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      margin-top: 60px;
+      max-width: 800px;
+    }
+
+    h1, h2 {
+      color: #4a00e0;
+      font-weight: 700;
+    }
+
+    .dark-mode h1,
+    .dark-mode h2,
+    .dark-mode label {
+      color: #70a1ff !important;
+    }
+
+    .logo {
+      width: 100px;
+      display: block;
+      margin: 0 auto 20px;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    .btn-primary {
+      background-color: #4a00e0;
+      border: none;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background-color: #3500b4;
+    }
+
+    .alert-info {
+      background: #f0f7ff;
+      border-left: 5px solid #4a00e0;
+      color: #00346b;
+    }
+
+    .dark-mode .alert-info {
+      background: #333955;
+      border-left: 5px solid #70a1ff;
+      color: #dff9fb;
+    }
+
+    ul li {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .toggle-switch {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dark Mode Toggle -->
+  <div class="toggle-switch">
+    <button class="btn btn-outline-light shadow-sm" onclick="toggleMode()">🌙 Toggle Mode</button>
+  </div>
+
+  <div class="container">
+    <img src="{{ url_for('static', filename='images/login_bg.png') }}" alt="Parkinson Logo" class="logo">
+    <h1 class="text-center"><i class="fas fa-brain"></i> Parkinson’s Detection System</h1>
+    <p class="text-center text-muted">Analyze your motor patterns and cognitive cues using AI</p>
+
+    <hr>
+
+    <h2><i class="fas fa-gears"></i> How It Works</h2>
+    <ul style="list-style: none; padding-left: 0;">
+      <li>🗣️ Upload your voice sample</li>
+      <li>🚶 Upload gait sensor data</li>
+      <li>⌨️ Enter your typing speed</li>
+      <li>✍️ Upload a handwriting image</li>
+    </ul>
+
+    <hr>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label>1. Upload Voice Sample (.wav recommended):</label>
+        <input type="file" name="voice_file" class="form-control" accept=".wav,.mp3" required>
+      </div>
+
+      <div class="mb-3">
+        <label>2. Upload Gait Data (CSV or sensor data file):</label>
+        <input type="file" name="gait_file" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label>3. Typing Speed (seconds per key):</label>
+        <input type="number" name="typing_speed" step="0.01" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label>4. Upload Handwriting Sample (image):</label>
+        <input type="file" name="handwriting_file" class="form-control" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">🔍 Detect Parkinson’s</button>
+    </form>
+
+    {% if results %}
+      <div class="alert alert-info mt-4">
+        <h4><i class="fas fa-chart-line"></i> Results:</h4>
+        <ul>
+          <li><strong>Voice Analysis:</strong> {{ results.voice }}</li>
+          <li><strong>Gait Analysis:</strong> {{ results.gait }}</li>
+          <li><strong>Keystroke Analysis:</strong> {{ results.keystroke }}</li>
+          <li><strong>Handwriting Analysis:</strong> {{ results.handwriting }}</li>
+          <hr>
+          <li><strong>Final Prediction:</strong> {{ results.final }}</strong></li>
+        </ul>
+      </div>
+    {% endif %}
+
+    <hr>
+    <h2><i class="fas fa-info-circle"></i> About Parkinson’s Disease</h2>
+    <p>
+      Parkinson’s is a progressive nervous system disorder that affects movement. Early symptoms may be mild and go unnoticed. This app uses AI to detect potential signs from various non-invasive data inputs.
+    </p>
+  </div>
+
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
